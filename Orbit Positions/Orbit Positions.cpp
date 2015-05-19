@@ -211,6 +211,7 @@ int _tmain(int argc, _TCHAR* argv[])
 	int deltaT;
 	bool cont = true;
 	double year, month, day;
+	char contin;
 	cout.precision(7);
 	cout << "ORBIT POSITION DATA" << endl;
 	//run the code until user exits
@@ -229,8 +230,18 @@ int _tmain(int argc, _TCHAR* argv[])
 		cin >> year;
 		cout << "Month of position. ";
 		cin >> month;
+		while (month < 1 || month > 12){
+			cout << "Please enter a valid month number (1-12). ";
+			cin.clear();
+			cin.ignore();
+			cin >> month;
+		}
 		cout << "Day ";
 		cin >> day;
+		while (day < 1 || day > 31){
+			cout << "Please enter a valid day of the month. ";
+			cin >> day;
+		}
 
 		J_date = JDCT(year, month, day);
 
@@ -240,9 +251,20 @@ int _tmain(int argc, _TCHAR* argv[])
 		//call position function
 		Position(planet, deltaT);
 		cin.ignore();
+		cout << "Continue (y/n)? ";
+		cin >> contin;
+		while (contin != 'y' && contin != 'n'){
+			cin.clear();
+			cin.ignore();
+			cout << "Please enter 'y' or 'n'. ";
+				cin >> contin;
+		}
+		if (contin == 'y'){
+			cont = true;
+		}
+		else{ break; }
 		cout << "%-----------------------------------------------------------------%" << endl;
 		cout << endl;
 	}
 	return 0;
 }
-
