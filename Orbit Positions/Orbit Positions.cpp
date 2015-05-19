@@ -173,7 +173,7 @@ void Position(string Plan, double days){
 	cout << "eccentricity (e) = " << e << endl;
 	cout << "inclination (i) = " << i << " degrees" << endl;
 	//find "n"
-	double n = sqrt(G*(M) / (pow(a, 3)));
+	double n = sqrt(G*(M + 5.972E24) / (pow(a, 3)));
 	//put time in seconds
 	double t = days * 3600 * 23.9344699;
 	//E-eSin(E) = m is keplers equation
