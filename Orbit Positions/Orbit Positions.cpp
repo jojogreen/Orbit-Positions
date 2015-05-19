@@ -218,7 +218,7 @@ int _tmain(int argc, _TCHAR* argv[])
 			cout << "What day do you want the position (Julian Date)? ";
 			cin >> day;
 		}
-		deltaT = 15134 - day;
+		deltaT = 2457156 - day;
 		cout << "Position Day is " << day << endl;
 		string planet(Planet);
 		//call position function
