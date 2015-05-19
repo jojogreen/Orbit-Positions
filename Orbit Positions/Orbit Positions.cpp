@@ -19,7 +19,7 @@ const double pi = 3.14159265358979323846;
 // Semi-Major Axis (meters)
 double A[9] = { 57909050000, 108939000000, 149598261000, 227939100000, 778547200000, 1433449370000, 2870671400, 4498542600000, 5874000000000 };
 //e_e = eccentricity
-double e_e[9] = { .2056, .0068, 0.0167, .0934, .0484, .0542, .0472, .0086, .24188 };
+double e_e[9] = { .2056, .0068, 0.01603, .0934, .0484, .0542, .0472, .0086, .24188 };
 //I_i = inclination degrees from the ecliptic plane
 double I_i[9] = { 7.005, 3.3947, 0, 1.851, 1.305, 2.484, .77, 1.769, 17.142 };
 //m_0 = mean anomoly radians
@@ -34,7 +34,8 @@ double OMEGA_MAT[9] = { 4.8311 * 10 * pi / 180, 7.6639 * 10 * pi / 180, 2.06567 
 double THETA[9] = { 1.20775 * 100 * pi / 180, 1.2077500 * 100 * pi / 180, 4.15732 * 10 * pi / 180, 127.603,
 9.07213 * 10 * pi / 180, 1.3047 * 100 * pi / 180, 1.4742 * 100 * pi / 180, 2.05873 * 100 * pi / 180,
 2.69886 * 100 * pi / 180, };
-double M = 1.7565670*pow(10, 28);
+double M = 1.989*pow(10, 30);
+double J_date;
 
 //This solves Kepler's equation using the bisection method
 double Bisection(double m, double e){
@@ -57,7 +58,7 @@ double Bisection(double m, double e){
 }
 
 // This calculates the position of the planet at a time "T"
-void Position(string Plan, char day){
+void Position(string Plan, double days){
 	double i; //inclination
 	double e; //eccentricity
 	double a; // semi-major axis
@@ -170,35 +171,47 @@ void Position(string Plan, char day){
 
 	//Output eccentricity inclination, etc
 	cout << "eccentricity (e) = " << e << endl;
-	cout << "inclination (i) = " << i << "degrees" << endl;
+	cout << "inclination (i) = " << i << " degrees" << endl;
 	//find "n"
-	double n = sqrt(G*M / (pow(a, 3)));
+	double n = sqrt(G*(M + 5.972E24) / (pow(a, 3)));
 	//put time in seconds
-	double t = day * 3600 * 24;
+	double t = days * 3600 * 23.9344699;
 	//E-eSin(E) = m is keplers equation
-	double m = n*t + m_o;
+	double m = n*t +m_o;
 	m = fmod(m, 2 * pi);
 	//solve kepler's equation using the bisection method
 	double E = Bisection(m, e);
 	//calculate true anomaly
-	double theta = 2 * atan(sqrt((1 + e) / (1 - e))*tan(E / 2)) + 2 * pi;
-	theta = fmod(theta * 180 / pi, 360);
+	double theta = 2 * atan(sqrt((1 + e) / (1 - e))*tan(E / 2));// +2 * pi;
 	// calculate radius from eccentricity, semi-major axis, ant true anomaly
 	double radius = (a*(1 - pow(e, 2))) / (1 + e*cos(theta));
+	theta = theta * 180 / pi;
+	if (theta < 0){
+		theta = theta + 360;
+	}
+	theta = fmod(theta, 360);
 	cout << "True Anomaly = " << theta << " (deg)" << endl;
 	cout << "Radius from Central body = " << radius << " (m)" << endl;
 
 }
 
 
-
+double JDCT(double y, double m, double d){
+	y += 8000;
+	if (m<3) { y--; m += 12; }
+	double JD = (y * 365) + (y / 4) - (y / 100) + (y / 400) - 1200820
+		+ (m * 153 + 3) / 5 - 92
+		+ d - 1;
+	 return JD;
+}
 
 int _tmain(int argc, _TCHAR* argv[])
 {
 	char Planet[15];
-	int day;
 	int deltaT;
 	bool cont = true;
+	double year, month, day;
+	cout.precision(7);
 	cout << "ORBIT POSITION DATA" << endl;
 	//run the code until user exits
 	while (cont == true)
@@ -209,17 +222,20 @@ int _tmain(int argc, _TCHAR* argv[])
 		cin >> setw(15) >> Planet;
 		cin.ignore();
 		cout << "Orbiting body is " << Planet << endl;
-		cout << "What day do you want the position for (Julian Date)? ";
+
+	//	cin.clear();
+	//	cin.ignore();
+		cout << "Year of position. ";
+		cin >> year;
+		cout << "Month of position. ";
+		cin >> month;
+		cout << "Day ";
 		cin >> day;
-		while (!cin)
-		{
-			cin.clear();
-			cin.ignore();
-			cout << "What day do you want the position (Julian Date)? ";
-			cin >> day;
-		}
-		deltaT = 2457156 - day;
-		cout << "Position Day is " << day << endl;
+
+		J_date = JDCT(year, month, day);
+
+		deltaT = J_date-2457156;
+		cout << "Position Day is " << J_date << endl;
 		string planet(Planet);
 		//call position function
 		Position(planet, deltaT);
